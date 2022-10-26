@@ -13,6 +13,8 @@ import {
   Paper
 } from '@mui/material';
 import { Links } from './signin';
+import { useAccount } from 'wagmi';
+import React from 'react';
 
 const ROONIVERSE_ADDRESS = process.env.APP_ROONIVERSE_ADDRESS;
 const THEHARVEST_ADDRESS = process.env.APP_THEHARVEST_ADDRESS;
@@ -43,6 +45,10 @@ const getTotalContribution = logs => {
 };
 
 const Portfolio = ({ user, contributions }) => {
+  const { address } = useAccount();
+  const isAccountDifferent =
+    user?.address?.toLowerCase() !== address?.toLowerCase();
+
   return (
     <>
       <Box
@@ -78,6 +84,13 @@ const Portfolio = ({ user, contributions }) => {
           px: 2
         }}
       >
+        {isAccountDifferent && (
+          <Typography variant="h6" align="left" color="red" sx={{ py: 5 }}>
+            You have changed your account. You are already logged in with the
+            other account, if you want to log in with a new account please, log
+            out, log in with the new account, validate it.
+          </Typography>
+        )}
         <Typography variant="h5" align="center">
           User session:
         </Typography>
