@@ -1,5 +1,22 @@
 ![Vercel](https://vercelbadge.vercel.app/api/mariano-aguero/next-portfolio-page?style=for-the-badge)
 
+# Next Portfolio Page
+
+1 - As a first step, we must log in with our wallet, in this case metamask.
+![My Image](images/1.png)
+![My Image](images/2.png)
+
+2 - After that, we will have to sign a message to verify that the wallet is ours, by clicking on the button "Sign message".
+![My Image](images/3.png)
+
+3 - We will be redirected to a section where we will be able to see our contributions to the addresses:
+ROONIVERSE=0x4798d36D453A83BfBc05d2841bAc19ef276B2D05
+THE HARVEST=0xdAe9226f803CE769a6A5971F7fEA50BeB678bF29
+
+![My Image](images/4.png)
+
+# Technically speaking
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
