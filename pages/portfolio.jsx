@@ -1,5 +1,7 @@
 import { getSession, signOut } from 'next-auth/react'
 import { ethers, BigNumber } from "ethers"
+import { Box, Button, Typography, TableContainer, Table, TableRow, TableCell, TableHead, TableBody, Paper } from "@mui/material"
+import { Links } from "./signin"
 
 const ROONIVERSE_ADDRESS = process.env.APP_ROONIVERSE_ADDRESS
 const THEHARVEST_ADDRESS = process.env.APP_THEHARVEST_ADDRESS
@@ -29,6 +31,70 @@ const getTotalContribution = (logs) => {
     )
 }
 
+const Portfolio = ({ user, contributions }) => {
+    return (
+
+        <>
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    py: 2,
+                    px: 2,
+                }}
+            >
+                <Links />
+                <Box textAlign='right'>
+                    <Button variant='outlined' onClick={() => {
+                        localStorage.clear()
+                        signOut({ redirect: '/signin' })
+                    }}> Sign out</Button>
+                </Box>
+            </Box>
+
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                py: 2,
+                px: 2,
+            }}>
+                <Typography variant='h5' align='center'>
+                    User session:
+                </Typography>
+                <Box sx={{ whiteSpace: "pre-wrap", py: 5 }}>{JSON.stringify(user, null, 2)}</Box>
+
+                <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><strong>Name</strong></TableCell>
+                                    <TableCell><strong>Your committed capital</strong></TableCell>
+                                    <TableCell><strong>Total committed capital</strong></TableCell>
+                                    <TableCell><strong>Your last date contribution</strong></TableCell>
+                                </TableRow>
+                            </TableHead>
+                        <TableBody>
+                        { contributions.map((contribution, index) => {
+                            const { name, yourCommittedCapital, totalCommittedCapital, lastDateContribution } = contribution
+                            return (
+                                <TableRow key={index}>
+                                    <TableCell>{name}</TableCell>
+                                    <TableCell>{yourCommittedCapital} USDC</TableCell>
+                                    <TableCell>{totalCommittedCapital} USDC</TableCell>
+                                    <TableCell>{lastDateContribution || "Not available"}</TableCell>
+                                </TableRow>
+                            )
+                        })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
+        </>
+    )
+}
+
 const getLastTimestamp = async (logs) => {
     if (!logs || logs.length === 0) return null
 
@@ -38,44 +104,6 @@ const getLastTimestamp = async (logs) => {
     const milliseconds = timestamp * 1000
     const dateObject = new Date(milliseconds)
     return dateObject.toLocaleString()
-}
-
-const Portfolio = ({ user, contributions }) => {
-    return (
-        <div>
-            <h4>User session:</h4>
-            <pre>{JSON.stringify(user, null, 2)}</pre>
-            <button onClick={() => {
-                localStorage.clear()
-                signOut({ redirect: '/signin' })
-            }}>Sign out</button>
-
-            <table>
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Your committed capital</th>
-                    <th>Total committed capital</th>
-                    <th>Your last date contribution</th>
-                </tr>
-                </thead>
-                <tbody>
-                { contributions.map((contribution, index) => {
-                    const { name, yourCommittedCapital, totalCommittedCapital, lastDateContribution } = contribution
-                    return (
-                       <tr key={index}>
-                           <td>{name}</td>
-                           <td>{yourCommittedCapital} USDC</td>
-                           <td>{totalCommittedCapital} USDC</td>
-                           <td>{lastDateContribution || "Not available"}</td>
-                       </tr>
-                   )
-                })}
-                </tbody>
-            </table>
-
-        </div>
-    )
 }
 
 export const getServerSideProps = async (context) => {
@@ -96,7 +124,7 @@ export const getServerSideProps = async (context) => {
     const USDCoinContract = new ethers.Contract(USDCOIN_ADDRESS, USDCOIN_ABI, provider)
 
     const contributionsPromises = GNOSIS_SAFE_ADDRESSES.map(async({ name , address: gnosisSafeAddress }) => {
-        const filter = USDCoinContract.filters.Transfer('0x4b1eb3e93bb3441e2f85c9cb56c324568b0acb71', gnosisSafeAddress)
+        const filter = USDCoinContract.filters.Transfer(address, gnosisSafeAddress)
         const balance = await USDCoinContract.balanceOf(gnosisSafeAddress)
         const logs = await USDCoinContract.queryFilter(filter)
         const totalContribution = getTotalContribution(logs)
